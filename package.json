@@ -2,6 +2,7 @@
     "buildNpmdoc":"gulp-jshint",
     "devDependencies": {
         "gulp-jshint": "*",
+        "jshint": "2.x",
         "electron-lite": "kaizhu256/node-electron-lite#alpha",
         "utility2": "kaizhu256/node-utility2#alpha"
     },
