@@ -62,7 +62,7 @@
 <tspan x="10" y="954">│ │ └─┬ rcfinder@0.1.9 </tspan>
 <tspan x="10" y="970">│ │   └── lodash.clonedeep@4.5.0 </tspan>
 <tspan x="10" y="986">│ └─┬ through2@2.0.3 </tspan>
-<tspan x="10" y="1002">│   ├─┬ readable-stream@2.2.8 </tspan>
+<tspan x="10" y="1002">│   ├─┬ readable-stream@2.2.9 </tspan>
 <tspan x="10" y="1018">│   │ ├── buffer-shims@1.0.0 </tspan>
 <tspan x="10" y="1034">│   │ ├── core-util-is@1.0.2 </tspan>
 <tspan x="10" y="1050">│   │ ├── inherits@2.0.3 </tspan>

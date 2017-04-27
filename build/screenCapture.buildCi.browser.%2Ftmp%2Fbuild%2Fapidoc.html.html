@@ -1,4 +1,4 @@
-<div class="apidocDiv">
+<html><head></head><body><div class="apidocDiv">
 <style>
 /*csslint
 */
@@ -47,17 +47,10 @@
 }
 </style>
 <h1>api documentation for
-    <a
-
-        href="http://github.com/spalger/gulp-jshint"
-
-    >gulp-jshint (v2.0.4)</a>
+    <a href="http://github.com/spalger/gulp-jshint">gulp-jshint (v2.0.4)</a>
 </h1>
 <h4>JSHint plugin for gulp</h4>
-<div class="apidocSectionDiv"><a
-    href="#apidoc.tableOfContents"
-    id="apidoc.tableOfContents"
-><h1>table of contents</h1></a><ol>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
 
     <li class="apidocModuleLi"><a href="#apidoc.module.gulp-jshint">module gulp-jshint</a><ol>
 
@@ -135,29 +128,29 @@
   return stream(
     function through(file) {
       // count error, warning and info messages
-      if (file.jshint &#x26;&#x26; file.jshint.results) {
+      if (file.jshint &amp;&amp; file.jshint.results) {
         messages = reduce(file.jshint.results, function(result, err) {
           return {
-            error: result.error + Number(err.error.code[0] === &#x27;E&#x27;),
-            warning: result.warning + Number(err.error.code[0] === &#x27;W&#x27;),
-            info: result.info + Number(err.error.code[0] === &#x27;I&#x27;)
+            error: result.error + Number(err.error.code[0] === 'E'),
+            warning: result.warning + Number(err.error.code[0] === 'W'),
+            info: result.info + Number(err.error.code[0] === 'I')
           };
         }, messages);
       }
 
       // check for failure
-      if (file.jshint &#x26;&#x26; !file.jshint.success &#x26;&#x26; !file.jshint.ignored) {
+      if (file.jshint &amp;&amp; !file.jshint.success &amp;&amp; !file.jshint.ignored) {
         (fails = fails || []).push(path.relative(process.cwd(), file.path));
       }
 
       // buffer or pass downstream
       (buffer || this).push(file);
     }, function flush() {
-      var failOnWarning = !opts.ignoreWarning &#x26;&#x26; messages.warning;
-      var failOnInfo = !opts.ignoreInfo &#x26;&#x26; messages.info;
-      if (fails &#x26;&#x26; (messages.error || failOnWarning || failOnInfo)) {
-        this.emit(&#x27;error&#x27;, new PluginError(&#x27;gulp-jshint&#x27;, {
-          message: &#x27;JSHint failed for: &#x27; + fails.join(&#x27;, &#x27;),
+      var failOnWarning = !opts.ignoreWarning &amp;&amp; messages.warning;
+      var failOnInfo = !opts.ignoreInfo &amp;&amp; messages.info;
+      if (fails &amp;&amp; (messages.error || failOnWarning || failOnInfo)) {
+        this.emit('error', new PluginError('gulp-jshint', {
+          message: 'JSHint failed for: ' + fails.join(', '),
           showStack: false
         }));
       }
@@ -178,14 +171,14 @@
 exports.reporter = function (reporter, reporterCfg) {
 reporterCfg = reporterCfg || {};
 
-if (reporter === &#x27;fail&#x27;) {
+if (reporter === 'fail') {
   return exports.<span class="apidocCodeKeywordSpan">failReporter</span>(reporterCfg);
 }
 
-var rpt = exports.loadReporter(reporter || &#x27;default&#x27;);
+var rpt = exports.loadReporter(reporter || 'default');
 
-if (typeof rpt !== &#x27;function&#x27;) {
-  throw new PluginError(&#x27;gulp-jshint&#x27;, &#x27;Invalid reporter&#x27;);
+if (typeof rpt !== 'function') {
+  throw new PluginError('gulp-jshint', 'Invalid reporter');
 }
 ...</pre></li>
     </ul>
@@ -201,20 +194,20 @@ if (typeof rpt !== &#x27;function&#x27;) {
     <ul>
     <li>description and source-code<pre class="apidocCodePre">loadReporter = function (reporter) {
   // we want the function
-  if (typeof reporter === &#x27;function&#x27;) return reporter;
+  if (typeof reporter === 'function') return reporter;
 
   // object reporters
-  if (typeof reporter === &#x27;object&#x27; &#x26;&#x26; typeof reporter.reporter === &#x27;function&#x27;) return reporter.reporter;
+  if (typeof reporter === 'object' &amp;&amp; typeof reporter.reporter === 'function') return reporter.reporter;
 
   // load jshint built-in reporters
-  if (typeof reporter === &#x27;string&#x27;) {
+  if (typeof reporter === 'string') {
     try {
-      return exports.loadReporter(require(&#x27;jshint/src/reporters/&#x27; + reporter));
+      return exports.loadReporter(require('jshint/src/reporters/' + reporter));
     } catch (err) {}
   }
 
   // load full-path or module reporters
-  if (typeof reporter === &#x27;string&#x27;) {
+  if (typeof reporter === 'string') {
     try {
       return exports.loadReporter(require(reporter));
     } catch (err) {}
@@ -223,18 +216,18 @@ if (typeof rpt !== &#x27;function&#x27;) {
     <li>example usage<pre class="apidocCodePre">...
 
 // object reporters
-if (typeof reporter === &#x27;object&#x27; &#x26;&#x26; typeof reporter.reporter === &#x27;function&#x27;) return reporter.reporter
+if (typeof reporter === 'object' &amp;&amp; typeof reporter.reporter === 'function') return reporter.reporter
 ;
 
 // load jshint built-in reporters
-if (typeof reporter === &#x27;string&#x27;) {
+if (typeof reporter === 'string') {
   try {
-    return exports.<span class="apidocCodeKeywordSpan">loadReporter</span>(require(&#x27;jshint/src/reporters/&#x27; + reporter));
+    return exports.<span class="apidocCodeKeywordSpan">loadReporter</span>(require('jshint/src/reporters/' + reporter));
   } catch (err) {}
 }
 
 // load full-path or module reporters
-if (typeof reporter === &#x27;string&#x27;) {
+if (typeof reporter === 'string') {
   try {
     return exports.loadReporter(require(reporter));
 ...</pre></li>
@@ -252,19 +245,19 @@ if (typeof reporter === &#x27;string&#x27;) {
     <li>description and source-code<pre class="apidocCodePre">reporter = function (reporter, reporterCfg) {
   reporterCfg = reporterCfg || {};
 
-  if (reporter === &#x27;fail&#x27;) {
+  if (reporter === 'fail') {
     return exports.failReporter(reporterCfg);
   }
 
-  var rpt = exports.loadReporter(reporter || &#x27;default&#x27;);
+  var rpt = exports.loadReporter(reporter || 'default');
 
-  if (typeof rpt !== &#x27;function&#x27;) {
-    throw new PluginError(&#x27;gulp-jshint&#x27;, &#x27;Invalid reporter&#x27;);
+  if (typeof rpt !== 'function') {
+    throw new PluginError('gulp-jshint', 'Invalid reporter');
   }
 
   // return stream that reports stuff
   return stream(function (file, cb) {
-    if (file.jshint &#x26;&#x26; !file.jshint.success &#x26;&#x26; !file.jshint.ignored) {
+    if (file.jshint &amp;&amp; !file.jshint.success &amp;&amp; !file.jshint.ignored) {
       // merge the reporter config into this files config
       var opt = defaults({}, reporterCfg, file.jshint.opt);
 
@@ -276,13 +269,13 @@ if (typeof reporter === &#x27;string&#x27;) {
 }</pre></li>
     <li>example usage<pre class="apidocCodePre">...
 ```js
-const jshint = require(&#x27;gulp-jshint&#x27;);
-const gulp   = require(&#x27;gulp&#x27;);
+const jshint = require('gulp-jshint');
+const gulp   = require('gulp');
 
-gulp.task(&#x27;lint&#x27;, function() {
-  return gulp.src(&#x27;./lib/*.js&#x27;)
+gulp.task('lint', function() {
+  return gulp.src('./lib/*.js')
     .pipe(jshint())
-    .pipe(jshint.<span class="apidocCodeKeywordSpan">reporter</span>(&#x27;YOUR_REPORTER_HERE&#x27;));
+    .pipe(jshint.<span class="apidocCodeKeywordSpan">reporter</span>('YOUR_REPORTER_HERE'));
 });
 ```
 
@@ -301,3 +294,4 @@ Plugin options:
     ]
 </div>
 </div>
+</body></html>

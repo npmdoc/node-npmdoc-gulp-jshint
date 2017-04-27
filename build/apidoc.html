@@ -63,17 +63,27 @@
 
         <li>
 
-            <a class="apidocElementLiA" href="#apidoc.element.gulp-jshint.extract">
-            function <span class="apidocSignatureSpan">gulp-jshint.</span>extract
-            <span class="apidocSignatureSpan">(when)</span>
+            <span class="apidocSignatureSpan">object <span class="apidocSignatureSpan">gulp-jshint.</span>index</span>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.gulp-jshint.index">module gulp-jshint.index</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-jshint.index.failReporter">
+            function <span class="apidocSignatureSpan">gulp-jshint.index.</span>failReporter
+            <span class="apidocSignatureSpan">(opts)</span>
             </a>
 
         </li>
 
         <li>
 
-            <a class="apidocElementLiA" href="#apidoc.element.gulp-jshint.loadReporter">
-            function <span class="apidocSignatureSpan">gulp-jshint.</span>loadReporter
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-jshint.index.loadReporter">
+            function <span class="apidocSignatureSpan">gulp-jshint.index.</span>loadReporter
             <span class="apidocSignatureSpan">(reporter)</span>
             </a>
 
@@ -81,8 +91,8 @@
 
         <li>
 
-            <a class="apidocElementLiA" href="#apidoc.element.gulp-jshint.reporter">
-            function <span class="apidocSignatureSpan">gulp-jshint.</span>reporter
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-jshint.index.reporter">
+            function <span class="apidocSignatureSpan">gulp-jshint.index.</span>reporter
             <span class="apidocSignatureSpan">(reporter, reporterCfg)</span>
             </a>
 
@@ -96,52 +106,95 @@
 <h1><a href="#apidoc.module.gulp-jshint" id="apidoc.module.gulp-jshint">module gulp-jshint</a></h1>
 
 
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.gulp-jshint.index" id="apidoc.module.gulp-jshint.index">module gulp-jshint.index</a></h1>
+
+
     <h2>
-        <a href="#apidoc.element.gulp-jshint.extract" id="apidoc.element.gulp-jshint.extract">
-        function <span class="apidocSignatureSpan">gulp-jshint.</span>extract
-        <span class="apidocSignatureSpan">(when)</span>
+        <a href="#apidoc.element.gulp-jshint.index.failReporter" id="apidoc.element.gulp-jshint.index.failReporter">
+        function <span class="apidocSignatureSpan">gulp-jshint.index.</span>failReporter
+        <span class="apidocSignatureSpan">(opts)</span>
         </a>
     </h2>
     <ul>
-    <li>description and source-code<pre class="apidocCodePre">function extract(when) {
-  when = when || &#x27;auto&#x27;;
+    <li>description and source-code<pre class="apidocCodePre">failReporter = function (opts) {
+  opts = opts || {};
 
-  return stream(function (file, cb) {
-    fileIgnored(file, function (err, ignored) {
-      if (err) return cb(err);
-      if (ignored) return cb(null, file);
+  // @type false|[]paths - paths to files that failed jshint
+  var fails = false;
 
-      file.jshint = file.jshint || {};
-      file.jshint.extracted = jshintcli.extract(file.contents.toString(&#x27;utf8&#x27;), when);
-      return cb(null, file);
-    });
-  });
+  // @type false|[]files - files that need to be passed downstream on flush
+  var buffer = opts.buffer !== false ? [] : false;
+
+  // @type object - count of jshint error, warning and info messages
+  var messages = {error: 0, warning: 0, info: 0};
+
+  return stream(
+    function through(file) {
+      // count error, warning and info messages
+      if (file.jshint &#x26;&#x26; file.jshint.results) {
+        messages = reduce(file.jshint.results, function(result, err) {
+          return {
+            error: result.error + Number(err.error.code[0] === &#x27;E&#x27;),
+            warning: result.warning + Number(err.error.code[0] === &#x27;W&#x27;),
+            info: result.info + Number(err.error.code[0] === &#x27;I&#x27;)
+          };
+        }, messages);
+      }
+
+      // check for failure
+      if (file.jshint &#x26;&#x26; !file.jshint.success &#x26;&#x26; !file.jshint.ignored) {
+        (fails = fails || []).push(path.relative(process.cwd(), file.path));
+      }
+
+      // buffer or pass downstream
+      (buffer || this).push(file);
+    }, function flush() {
+      var failOnWarning = !opts.ignoreWarning &#x26;&#x26; messages.warning;
+      var failOnInfo = !opts.ignoreInfo &#x26;&#x26; messages.info;
+      if (fails &#x26;&#x26; (messages.error || failOnWarning || failOnInfo)) {
+        this.emit(&#x27;error&#x27;, new PluginError(&#x27;gulp-jshint&#x27;, {
+          message: &#x27;JSHint failed for: &#x27; + fails.join(&#x27;, &#x27;),
+          showStack: false
+        }));
+      }
+
+      if (buffer) {
+        // send the buffered files downstream
+        buffer.forEach(function (file) {
+          this.push(file);
+        }, this);
+      }
+    }
+  );
 }</pre></li>
     <li>example usage<pre class="apidocCodePre">...
+}
+};
 
-Tells JSHint to extract JavaScript from HTML files before linting (see [JSHint CLI flags](http://www.jshint.com/docs/cli/)). Keep
- in mind that it doesn&#x27;t override the file&#x27;s content after extraction. This is your tool of choice to lint web components
-!
+exports.reporter = function (reporter, reporterCfg) {
+reporterCfg = reporterCfg || {};
 
-```js
-gulp.task(&#x27;lintHTML&#x27;, function() {
-  return gulp.src(&#x27;./src/*.html&#x27;)
-    // if flag is not defined default value is &#x27;auto&#x27;
-    .pipe(jshint.<span class="apidocCodeKeywordSpan">extract</span>(&#x27;auto|always|never&#x27;))
-    .pipe(jshint())
-    .pipe(jshint.reporter(&#x27;default&#x27;));
-});
-```
+if (reporter === &#x27;fail&#x27;) {
+  return exports.<span class="apidocCodeKeywordSpan">failReporter</span>(reporterCfg);
+}
 
-## LICENSE
+var rpt = exports.loadReporter(reporter || &#x27;default&#x27;);
+
+if (typeof rpt !== &#x27;function&#x27;) {
+  throw new PluginError(&#x27;gulp-jshint&#x27;, &#x27;Invalid reporter&#x27;);
+}
 ...</pre></li>
     </ul>
 
 
 
     <h2>
-        <a href="#apidoc.element.gulp-jshint.loadReporter" id="apidoc.element.gulp-jshint.loadReporter">
-        function <span class="apidocSignatureSpan">gulp-jshint.</span>loadReporter
+        <a href="#apidoc.element.gulp-jshint.index.loadReporter" id="apidoc.element.gulp-jshint.index.loadReporter">
+        function <span class="apidocSignatureSpan">gulp-jshint.index.</span>loadReporter
         <span class="apidocSignatureSpan">(reporter)</span>
         </a>
     </h2>
@@ -167,14 +220,31 @@ gulp.task(&#x27;lintHTML&#x27;, function() {
     } catch (err) {}
   }
 }</pre></li>
-    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+// object reporters
+if (typeof reporter === &#x27;object&#x27; &#x26;&#x26; typeof reporter.reporter === &#x27;function&#x27;) return reporter.reporter
+;
+
+// load jshint built-in reporters
+if (typeof reporter === &#x27;string&#x27;) {
+  try {
+    return exports.<span class="apidocCodeKeywordSpan">loadReporter</span>(require(&#x27;jshint/src/reporters/&#x27; + reporter));
+  } catch (err) {}
+}
+
+// load full-path or module reporters
+if (typeof reporter === &#x27;string&#x27;) {
+  try {
+    return exports.loadReporter(require(reporter));
+...</pre></li>
     </ul>
 
 
 
     <h2>
-        <a href="#apidoc.element.gulp-jshint.reporter" id="apidoc.element.gulp-jshint.reporter">
-        function <span class="apidocSignatureSpan">gulp-jshint.</span>reporter
+        <a href="#apidoc.element.gulp-jshint.index.reporter" id="apidoc.element.gulp-jshint.index.reporter">
+        function <span class="apidocSignatureSpan">gulp-jshint.index.</span>reporter
         <span class="apidocSignatureSpan">(reporter, reporterCfg)</span>
         </a>
     </h2>
